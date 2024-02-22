@@ -5,15 +5,56 @@ namespace App\Http\Controllers;
 use App\Models\Informasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+
 
 class InformasiController extends Controller
 {
-    public function index()
+
+     public function index()
+    {
+        return view('landing.page1');
+    }
+    
+    public function admin()
     {
         return view('admin');
     }
+    public function login()
+    {
+        return view('login');
+    }
+    public function create()
+    {
+        return view('create');
+    }
 
-    public function createPrestasi()
+   
+
+    public function auth(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|exists:users,email',
+            'password' => 'required',
+        ],[
+            'email.exists' => "This email doesn't exists"
+        ]);
+
+        $user = $request->only('email', 'password');
+        if (Auth::attempt($user)) {
+        if(Auth::user()->role == 'admin'){
+            return redirect()->route('admin');
+        }elseIf(Auth::user()->role == 'petugas'){
+            return redirect()->route('data.petugas');
+        }
+            return redirect()->route('data');
+        } else {
+            return redirect('/login')->with('fail', "Gagal login, periksa dan coba lagi!");
+        }
+    }
+     
+
+    public function Prestasi()
     {
         $informasis = Informasi::all();
 
